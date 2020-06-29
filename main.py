@@ -7,7 +7,9 @@ from synonym import nltk_wordnet as nlt
 import os
 import configparser
 #import spacy
-
+# import pdb
+import nltk
+nltk.download('wordnet')
 import argparse
 
 
@@ -18,7 +20,12 @@ def write_to_folder(data,message,file_name):
     :param message: a short message that describe the element to be listed
     :param file_name: file name
     """
-    f = open("./result/"+file_name, "a")
+    path = os.path.join("result",file_name)
+    # pdb.set_trace()
+    if not os.path.exists(path):
+        f = open(path, "w",encoding = "utf8")
+    else:
+        f = open(path, "a")
     f.write(message+'\n\t'+str(data)+'\n')
     f.close()
 
@@ -54,10 +61,10 @@ def main():
             raise Exception("Define a Valid email address for MyMemory API in config.ini")
         else:
             valid_mail = my_memory_config['email']
-        if "api_key" not in yandex_config or yandex_config["api_key"] == "":
-            raise Exception("Yandex Translate API token is not defined in config.ini")
-        else:
-            yandex_api_key = yandex_config["api_key"]
+        # if "api_key" not in yandex_config or yandex_config["api_key"] == "":
+        #     raise Exception("Yandex Translate API token is not defined in config.ini")
+        # else:
+        #     yandex_api_key = yandex_config["api_key"]
         if args.g:
             if "api_key" not in google_config or google_config["api_key"] == "":
                 raise Exception("Google Translate API token is not defined in config.ini")
@@ -88,41 +95,42 @@ def main():
     spacy_tags = ['VERB','NOUN'] #list of tag to extract from sentence using spacy
     wm_tags = ['v','n'] #wordnet select only lemmas which pos-taggs is in wm_tags
     data3 = nlt.main(file_path,spacy_tags,wm_tags)
-
+    print(data1,data2,data3)
     print("Start translation")
     # generate paraphrases with MyMemory API
     memory_result1 = memory.translate_list(data1,valid_mail)
     memory_result2 = memory.translate_list(data2,valid_mail)
     memory_result3 = memory.translate_list(data3,valid_mail)
-    
+    print(memory_result1,memory_result2,memory_result3)
     result = memory.translate_file(file_path,valid_mail)
-
+    # pdb.set_trace()
+    
     # merge memory_result1, memory_result2, memory_result3 with result
     result= merge_data(result,memory_result1)
     result= merge_data(result,memory_result2)
     result= merge_data(result,memory_result3)
 
     # generate paraphrases with Yandex Translator API
-    yandex_result1 = yandex.translate_list(data1,yandex_api_key,pivot_level)
-    yandex_result2 = yandex.translate_list(data2,yandex_api_key,pivot_level)
-    yandex_result3 = yandex.translate_list(data3,yandex_api_key,pivot_level)
+    # yandex_result1 = yandex.translate_list(data1,yandex_api_key,pivot_level)
+    # yandex_result2 = yandex.translate_list(data2,yandex_api_key,pivot_level)
+    # yandex_result3 = yandex.translate_list(data3,yandex_api_key,pivot_level)
 
-    # merge memory_result1, memory_result2, memory_result3 with result
-    result= merge_data(result,yandex_result1)
-    result= merge_data(result,yandex_result2)
-    result= merge_data(result,yandex_result3)
+    # # merge memory_result1, memory_result2, memory_result3 with result
+    # result= merge_data(result,yandex_result1)
+    # result= merge_data(result,yandex_result2)
+    # result= merge_data(result,yandex_result3)
 
-    yandex_result = yandex.translate_file(file_path,yandex_api_key,pivot_level)
+    # yandex_result = yandex.translate_file(file_path,yandex_api_key,pivot_level)
 
-    extracted_pos = pos.pos_extraction(file_path)
-    yandex_paraphrases = yandex.translate_dict(extracted_pos,yandex_api_key,pivot_level)
+    # extracted_pos = pos.pos_extraction(file_path)
+    # yandex_paraphrases = yandex.translate_dict(extracted_pos,yandex_api_key,pivot_level)
     
     
-    #create a function that take a list of dataset and merge them togheteherset
-    for key,values in result.items():
-        values.update(yandex_result[key])
-        values.update(yandex_paraphrases[key])
-        result[key] = values
+    # #create a function that take a list of dataset and merge them togheteherset
+    # for key,values in result.items():
+    #     values.update(yandex_result[key])
+    #     values.update(yandex_paraphrases[key])
+    #     result[key] = values
 
 
     write_to_folder(result,"Generated Paraphrases:","paraphrases.txt")
