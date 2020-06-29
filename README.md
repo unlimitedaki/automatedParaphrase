@@ -29,4 +29,12 @@ python main.py -f file_name.txt
 
 ## 输出
 
-输出的结果会添加到result/paraphrases.txt
+输出的结果会添加到result/paraphrases.txt，会将整个流程每个阶段的复述结果都输出
+
+```
+Generated Paraphrases: 同义词替换和翻译的结果
+Universal Sentence Encoder Filtering: 句子编码只有用语义相似度过滤的结果
+BERT filtering: BERT过滤结果
+BERT deduplication: BERT去重结果
+```
+
